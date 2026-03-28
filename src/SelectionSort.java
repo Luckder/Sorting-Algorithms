@@ -1,6 +1,7 @@
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
+
+// Author: David Chan (Luckder)
 
 public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
 
@@ -9,8 +10,7 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
-        int n = sortMe.size();
+        int n = list.size();
 
         int smallest = 0;
         int curr;
@@ -22,19 +22,17 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
             for (int i = count; i < n; i++) {
                 curr = i;
 
-                if (sortMe.get(curr).getKey().compareTo(sortMe.get(smallest).getKey()) < 0) {
+                if (list.get(curr).getKey().compareTo(list.get(smallest).getKey()) < 0) {
                     smallest = curr;
                 }
             }
 
-            temp = sortMe.get(count);
-            sortMe.set(count, sortMe.get(smallest));
-            sortMe.set(smallest, temp);
+            super.swap(list, count, smallest);
             count++;
             smallest = count;
         }
 
-        return sortMe;
+        return list;
     }
 
     @Override

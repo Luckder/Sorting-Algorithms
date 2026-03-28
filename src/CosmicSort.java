@@ -1,6 +1,7 @@
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
+
+// Author: David Chan (Luckder)
 
 public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
 
@@ -9,9 +10,7 @@ public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
-
-        while(!isSorted(sortMe)) {
+        while(!isSorted(list)) {
             try {
                 // Waits to give time for cosmic rays to flip bits in memory
                 Thread.sleep(5 * 1000); // 5 Seconds
@@ -20,7 +19,7 @@ public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
             }
         }
 
-        return sortMe;
+        return list;
     }
 
     @Override

@@ -1,7 +1,8 @@
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+// Author: David Chan (Luckder)
 
 public class BogoSort<T extends Comparable<T>> extends Sort<T> {
 
@@ -10,22 +11,19 @@ public class BogoSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
         Random rng = new Random();
-        int n = sortMe.size();
+        int n = list.size();
 
-        while (!isSorted(sortMe)) {
+        while (!isSorted(list)) {
             // Fisher–Yates Modern Shuffling Algorithm
             for (int i = n - 1; i > 0; i--) {
                 int j = rng.nextInt(i + 1);
 
-                SimpleEntry<T, Integer> temp = sortMe.get(i);
-                sortMe.set(i, sortMe.get(j));
-                sortMe.set(j, temp);
+                super.swap(list, i, j);
             }
         }
 
-        return sortMe;
+        return list;
     }
 
     @Override

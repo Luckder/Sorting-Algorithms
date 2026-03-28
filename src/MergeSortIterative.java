@@ -2,6 +2,8 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.List;
 
+// Author: David Chan (Luckder)
+
 public class MergeSortIterative<T extends Comparable<T>> extends Sort<T> {
 
     @Override
@@ -39,7 +41,7 @@ public class MergeSortIterative<T extends Comparable<T>> extends Sort<T> {
         return sortMe;
     }
 
-    public List<SimpleEntry<T, Integer>> merge(List<SimpleEntry<T, Integer>> left, List<SimpleEntry<T, Integer>> right) {
+    protected List<SimpleEntry<T, Integer>> merge(List<SimpleEntry<T, Integer>> left, List<SimpleEntry<T, Integer>> right) {
         List<SimpleEntry<T, Integer>> merged = new ArrayList<>();
 
         int i = 0; // Left Index
