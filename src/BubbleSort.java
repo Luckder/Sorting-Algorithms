@@ -9,10 +9,31 @@ public class BubbleSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = List.copyOf(list);
+        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
         int n = list.size();
 
-        return List.of();
+        boolean notSorted = true;
+
+        while(notSorted) {
+            notSorted = false; // Assume sorted
+
+            for (int i = 1; i < n; i++) {
+                if (sortMe.get(i).getKey().compareTo(sortMe.get(i - 1).getKey()) < 0) {
+                    notSorted = true; // List is not sorted
+
+                    SimpleEntry<T, Integer> temp = sortMe.get(i);
+                    sortMe.set(i, sortMe.get(i - 1));
+                    sortMe.set(i - 1, temp);
+                }
+            }
+        }
+
+        return sortMe;
+    }
+
+    @Override
+    public String toString() {
+        return "BubbleSort";
     }
 
 }

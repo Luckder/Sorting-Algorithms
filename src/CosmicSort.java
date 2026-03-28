@@ -1,4 +1,5 @@
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
 
 public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
@@ -8,7 +9,7 @@ public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = List.copyOf(list);
+        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
 
         while(!isSorted(sortMe)) {
             try {
@@ -19,8 +20,12 @@ public class CosmicSort<T extends Comparable<T>> extends Sort<T> {
             }
         }
 
-        System.out.println("Sorted List Is Stable? " +  isStable(sortMe));
         return sortMe;
+    }
+
+    @Override
+    public String toString() {
+        return "CosmicSort";
     }
 
 }

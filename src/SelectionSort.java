@@ -1,4 +1,5 @@
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
@@ -8,7 +9,7 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        List<SimpleEntry<T, Integer>> sortMe = List.copyOf(list);
+        List<SimpleEntry<T, Integer>> sortMe = new ArrayList<>(list);
         int n = sortMe.size();
 
         int smallest = 0;
@@ -16,7 +17,8 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
         SimpleEntry<T, Integer> temp;
         int count = 0;
 
-        while (!isSorted(sortMe)) {
+        // Does not need to use a while loop because selection sort is guaranteed to be sorted after n - 1 iterations
+        for (int j = 0; j < n - 1; j++) {
             for (int i = count; i < n; i++) {
                 curr = i;
 
@@ -26,13 +28,18 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
             }
 
             temp = sortMe.get(count);
-            sortMe.set(count, smallest);
-            smallest = temp;
-
+            sortMe.set(count, sortMe.get(smallest));
+            sortMe.set(smallest, temp);
             count++;
+            smallest = count;
         }
 
         return sortMe;
+    }
+
+    @Override
+    public String toString() {
+        return "SelectionSort";
     }
 
 }

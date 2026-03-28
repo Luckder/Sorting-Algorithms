@@ -24,7 +24,9 @@ public abstract class Sort<T extends Comparable<T>> {
 
         for (int i = 1; i< n; i++) {
             if (defense.get(i).getKey().compareTo(defense.get(i - 1).getKey()) == 0) {
-                return defense.get(i - 1).getValue() < defense.get(i).getValue();
+                if (defense.get(i - 1).getValue() > defense.get(i).getValue()) {
+                    return false;
+                }
             }
         }
 
