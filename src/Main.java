@@ -10,7 +10,7 @@ import io.github.classgraph.ScanResult;
 public final class Main {
     private static final List<Sort<? extends Comparable<?>>> algorithms = load();
 
-    private static List<Sort<? extends Comparable<?>>> load() {
+    static List<Sort<? extends Comparable<?>>> load() {
         List<Sort<? extends Comparable<?>>> list = new ArrayList<>();
 
         try (ScanResult scan = new ClassGraph()
@@ -33,7 +33,7 @@ public final class Main {
         }
     }
 
-    private static String getTime(long nanos) {
+    static String getTime(long nanos) {
         // I ain't gonna do days
         if (nanos > 3_600_000_000_000L) { return nanos / 3_600_000_000_000.0 + " h"; }
         else if (nanos > 60_000_000_000L)    { return nanos / 60_000_000_000.0    + " min"; }
@@ -85,17 +85,17 @@ public final class Main {
                 System.out.println("Sorted List is too long to print!\n");
             }
         }
+
+        System.out.println("DONE!\n");
     }
 
-    protected static  List<SimpleEntry<Integer, Integer>> makeIntegerList(int cap) {
+    public static  List<SimpleEntry<Integer, Integer>> makeIntegerList(int limit) {
         int count = 0;
         Random rng = new Random();
-        //int limit = rng.nextInt(2, 16); // 2 to 15
-        int limit = cap;
         List<SimpleEntry<Integer, Integer>> test = new ArrayList<>();
 
         while (count < limit - 1) {
-            if (cap - test.size() >= 2 && rng.nextInt(4) == 0) {
+            if (limit - test.size() >= 2 && rng.nextInt(4) == 0) {
                 // Force adjacent duplicates
                 int value = rng.nextInt(1000);
                 test.add(new SimpleEntry<>(value, count));

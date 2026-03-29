@@ -4,6 +4,8 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Random;
 
+// Author: David Chan (Luckder)
+
 public class QuickSortHoareParanoid<T extends Comparable<T>> extends QuickSortHoare<T> {
 
     private final Random rng = new Random();

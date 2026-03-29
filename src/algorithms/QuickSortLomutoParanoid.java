@@ -4,6 +4,8 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Random;
 
+// Author: David Chan (Luckder)
+
 public class QuickSortLomutoParanoid<T extends Comparable<T>> extends QuickSortLomuto<T> {
     // This proves that Lomuto's Algortihm for Quicksort is incompatible with Paranoid modifications
     // Poor Big-O time complexities

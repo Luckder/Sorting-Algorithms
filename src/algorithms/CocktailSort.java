@@ -3,6 +3,8 @@ package algorithms;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
+// Author: David Chan (Luckder)
+
 public class CocktailSort<T extends Comparable<T>> extends BubbleSort<T> {
 
     @Override

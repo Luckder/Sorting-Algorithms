@@ -1,11 +1,12 @@
 package algorithms;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Comparator;
 import java.util.List;
 
 // Author: David Chan (Luckder)
 
-public abstract class Sort<T extends Comparable<T>> {
+public abstract class Sort<T extends Comparable<T>> implements Sortable<T> {
 
     public abstract List<SimpleEntry<T, Integer>> sort(List<SimpleEntry<T, Integer>> list);
 
