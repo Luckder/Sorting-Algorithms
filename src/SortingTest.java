@@ -10,6 +10,11 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.AbstractMap.SimpleEntry;
 
+import java.time.Instant;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.*;
+
 // Author: David Chan (Luckder)
 
 public final class SortingTest {
@@ -25,6 +30,18 @@ public final class SortingTest {
                     Sort<Integer> s = (Sort<Integer>) alg;
                     return s;
                 });
+    }
+
+    @Test
+    void sortTestSpecific() {
+        Random rng = new Random();
+        @SuppressWarnings("unchecked")
+        Sort<Integer> sorter = (Sort<Integer>) algorithms.stream()
+                .filter(alg -> (alg instanceof HeapSort))
+                .toList()
+                .get(0);
+        System.out.println("Testing " + sorter + " with 100,000 elements...");
+        assertTrue(sorter.isSorted(sorter.sort(Main.makeIntegerList(100001))), "List has to be sorted!");
     }
 
     @Test
@@ -71,6 +88,76 @@ public final class SortingTest {
         assertTimeout(Duration.ofSeconds(10), () -> {
             sorter.sort(list);
         }, sorter + " exceeded the time limit!");
+    }
+
+    @Test
+    void sortRace() throws InterruptedException {
+        int limit = 100_000;
+        List<SimpleEntry<Integer, Integer>> original = Main.makeIntegerList(limit);
+        Instant raceStart = Instant.now();
+
+        List<Sort<Integer>> racers = algorithms.stream()
+                .filter(alg -> !(alg instanceof CosmicSort))
+                .filter(alg -> !(alg instanceof BogoSort))
+                .map(alg -> {
+                    @SuppressWarnings("unchecked")
+                    Sort<Integer> s = (Sort<Integer>) alg;
+                    return s;
+                })
+                .toList();
+
+        // Each thread gets its own copy, all copied before any thread starts
+        Map<Sort<Integer>, List<SimpleEntry<Integer, Integer>>> copies = new LinkedHashMap<>();
+        for (Sort<Integer> sorter : racers) {
+            copies.put(sorter, new ArrayList<>(original));
+        }
+
+        CountDownLatch ready  = new CountDownLatch(racers.size()); // All threads signal when ready
+        CountDownLatch start  = new CountDownLatch(1);             // Main fires the starting gun
+        CountDownLatch finish = new CountDownLatch(racers.size()); // Main waits for all to finish
+
+        ExecutorService pool = Executors.newFixedThreadPool(racers.size());
+
+        for (Sort<Integer> sorter : racers) {
+            List<SimpleEntry<Integer, Integer>> copy = copies.get(sorter);
+
+            pool.submit(() -> {
+                ready.countDown();       // Signal: I'm ready
+                try {
+                    start.await();       // Wait for starting gun
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+
+                long threadStart = System.nanoTime();
+                List<SimpleEntry<Integer, Integer>> sorted = sorter.sort(copy);
+                long elapsed = System.nanoTime() - threadStart;
+
+                String timestamp = DateTimeFormatter
+                        .ofPattern("HH:mm:ss.SSS")
+                        .format(LocalTime.now());
+
+                System.out.printf("[%s] %-35s finished in %s%n",
+                        timestamp, sorter.toString(), Main.getTime(elapsed));
+
+                assertTrue(sorter.isSorted(sorted), sorter + " did not sort correctly!");
+                finish.countDown();
+            });
+        }
+
+        ready.await();   // Wait until every thread is staged and ready
+        System.out.println("\n>>> RACE START — " + racers.size() + " algorithms, n = " + limit + "\n");
+        start.countDown(); // Fire!
+
+        boolean allFinished = finish.await(2, TimeUnit.MINUTES);
+        pool.shutdown();
+
+        Duration totalRaceTime = Duration.between(raceStart, Instant.now());
+        System.out.printf("%n>>> RACE OVER — wall clock time: %.3f s%n",
+                totalRaceTime.toMillis() / 1000.0);
+
+        assertTrue(allFinished, "One or more algorithms timed out after 2 minutes!");
     }
 
 }
