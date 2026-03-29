@@ -6,7 +6,7 @@ import java.util.List;
 
 // Author: David Chan (Luckder)
 
-public class PigeonholeSort<T extends Comparable<T>> extends CountingSort<T> {
+public class PigeonholeSort<T extends Comparable<T>> extends Sort<T> {
     // Conceptually identical to CountingSort but stores actual elements in holes
     // rather than using a count array + prefix sum + buffer placement.
     // Each "pigeonhole" corresponds to one distinct value in the input range.

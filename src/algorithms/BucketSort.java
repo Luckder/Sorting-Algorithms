@@ -6,7 +6,7 @@ import java.util.List;
 
 // Author: David Chan (Luckder)
 
-public class BucketSort<T extends Comparable<T>> extends CountingSort<T> {
+public class BucketSort<T extends Comparable<T>> extends Sort<T> {
     // Distributes elements into value-range buckets, recursively sorts each bucket
     // using BucketSort itself (no other algorithm), then concatenates back.
     // Extends CountingSort only to reuse getInt() — no counting logic is inherited.

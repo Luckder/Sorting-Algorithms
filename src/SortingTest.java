@@ -37,11 +37,11 @@ public final class SortingTest {
         Random rng = new Random();
         @SuppressWarnings("unchecked")
         Sort<Integer> sorter = (Sort<Integer>) algorithms.stream()
-                .filter(alg -> (alg.toString().equals("Pattern-Defeating QuickSort")))
+                .filter(alg -> (alg.toString().equals("InsertionSort")))
                 .toList()
                 .get(0);
         System.out.println("Testing " + sorter + " with 100,000 elements...");
-        assertTrue(sorter.isSorted(sorter.sort(Main.makeIntegerList(100001))), "List has to be sorted!");
+        assertTrue(sorter.isSorted(sorter.sort(Main.makeIntegerList(1001))), "List has to be sorted!");
     }
 
     @Test

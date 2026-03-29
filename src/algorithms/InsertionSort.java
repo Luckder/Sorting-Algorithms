@@ -20,7 +20,7 @@ public class InsertionSort<T extends Comparable<T>> extends Sort<T> {
 
             // j always points to an empty space in the left subarray
             while (j >= 0 && list.get(j).getKey().compareTo(curr.getKey()) > 0) {
-                list.set(j + 1, list.get(j));
+                super.swap(list, j + 1, j);
                 j--;
             }
 

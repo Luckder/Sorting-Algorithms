@@ -4,10 +4,10 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 
 // Author: David Chan (Luckder)
-// Based on Orson Peters' Pattern-Defeating QuickSort (pdqsort), 2015.
-// https://github.com/orlp/pdqsort
 
 public class QuickSortPD<T extends Comparable<T>> extends IntroSort<T> {
+    // Based on Orson Peters' Pattern-Defeating QuickSort (pdqsort), 2015.
+// https://github.com/orlp/pdqsort
 
     // Slightly larger than IntroSort's 16 — pdqsort's insertion sort is more effective
     // because it runs on nearly-sorted data (good pivots leave near-sorted subarrays)
