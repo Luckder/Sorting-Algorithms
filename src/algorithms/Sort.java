@@ -11,11 +11,10 @@ public abstract class Sort<T extends Comparable<T>> implements Sortable<T> {
     public abstract List<SimpleEntry<T, Integer>> sort(List<SimpleEntry<T, Integer>> list);
 
     public boolean isSorted(List<SimpleEntry<T, Integer>> list) {
-        List<SimpleEntry<T, Integer>> defense = List.copyOf(list);
-        int  n = defense.size();
+        int  n = list.size();
 
         for (int i = 1; i < n; i++) {
-            if (defense.get(i).getKey().compareTo(defense.get(i - 1).getKey()) < 0) {
+            if (list.get(i).getKey().compareTo(list.get(i - 1).getKey()) < 0) {
                 return false;
             }
         }
@@ -24,12 +23,11 @@ public abstract class Sort<T extends Comparable<T>> implements Sortable<T> {
     }
 
     public boolean isStable(List<SimpleEntry<T, Integer>> list) {
-        List<SimpleEntry<T, Integer>> defense = List.copyOf(list);
-        int n = defense.size();
+        int n = list.size();
 
         for (int i = 1; i< n; i++) {
-            if (defense.get(i).getKey().compareTo(defense.get(i - 1).getKey()) == 0) {
-                if (defense.get(i - 1).getValue() > defense.get(i).getValue()) {
+            if (list.get(i).getKey().compareTo(list.get(i - 1).getKey()) == 0) {
+                if (list.get(i - 1).getValue() > list.get(i).getValue()) {
                     return false;
                 }
             }

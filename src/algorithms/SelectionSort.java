@@ -15,17 +15,14 @@ public class SelectionSort<T extends Comparable<T>> extends Sort<T> {
         int n = list.size();
 
         int smallest = 0;
-        int curr;
         SimpleEntry<T, Integer> temp;
         int count = 0;
 
         // Does not need to use a while loop because selection sort is guaranteed to be sorted after n - 1 iterations
         for (int j = 0; j < n - 1; j++) {
             for (int i = count; i < n; i++) {
-                curr = i;
-
-                if (list.get(curr).getKey().compareTo(list.get(smallest).getKey()) < 0) {
-                    smallest = curr;
+                if (list.get(i).getKey().compareTo(list.get(smallest).getKey()) < 0) {
+                    smallest = i;
                 }
             }
 

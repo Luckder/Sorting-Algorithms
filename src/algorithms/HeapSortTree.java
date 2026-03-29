@@ -50,7 +50,6 @@ public class HeapSortTree<T extends  Comparable<T>> extends Sort<T> {
             }
         }
 
-        Collections.reverse(sortedList);
         return sortedList;
     }
 
@@ -126,25 +125,25 @@ public class HeapSortTree<T extends  Comparable<T>> extends Sort<T> {
     private void siftDown(HeapNode node) {
         if (node == null) return;
 
-        HeapNode largest = node;
+        HeapNode smallest  = node;
 
-        if (node.left != null && node.left.value.getKey().compareTo(largest.value.getKey()) > 0) {
-            largest = node.left;
+        if (node.left != null && node.left.value.getKey().compareTo(smallest.value.getKey()) < 0) {
+            smallest = node.left;
         }
 
-        if (node.right != null && node.right.value.getKey().compareTo(largest.value.getKey()) > 0) {
-            largest = node.right;
+        if (node.right != null && node.right.value.getKey().compareTo(smallest.value.getKey()) < 0) {
+            smallest = node.right;
         }
 
         // If the largest is one of the children, swap values and continue sifting
-        if (largest != node) {
+        if (smallest != node) {
             // Swap only the SimpleEntry values, not the nodes themselves
             SimpleEntry<T, Integer> tempValue = node.value;
-            node.value = largest.value;
-            largest.value = tempValue;// Count the swap for visualization
+            node.value = smallest.value;
+            smallest.value = tempValue;// Count the swap for visualization
 
             // Recurse down to the child we just swapped with
-            siftDown(largest);
+            siftDown(smallest);
         }
     }
 
@@ -168,6 +167,6 @@ public class HeapSortTree<T extends  Comparable<T>> extends Sort<T> {
 
     @Override
     public String toString() {
-        return "HeapSort";
+        return "HeapSort (Using Heap Structure)";
     }
 }

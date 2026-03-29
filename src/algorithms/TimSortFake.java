@@ -144,7 +144,7 @@ public class TimSortFake <T extends Comparable<T>> extends MergeSortIterative<T>
 
     @Override
     public String toString() {
-        return "TimSort (Inefficient)";
+        return "TimSort (No Galloping)";
     }
 
 }

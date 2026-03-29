@@ -3,7 +3,6 @@ package algorithms;
 import java.util.AbstractMap.SimpleEntry;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 // Author: David Chan (Luckder)
@@ -16,7 +15,6 @@ public class CountingSort<T extends Comparable<T>> extends Sort<T> {
         if (list == null) { return null; }
         if (list.isEmpty() || list.size() == 1) { return list; }
 
-        T sample = list.get(0).getKey();
         int n = list.size();
         int max = Integer.MIN_VALUE;
         int min = Integer.MAX_VALUE;
@@ -32,21 +30,26 @@ public class CountingSort<T extends Comparable<T>> extends Sort<T> {
             count[getInt(entry.getKey()) - min]++;
         }
 
-        List<SimpleEntry<T, Integer>> sorted = new ArrayList<>();
-
-        for (int i = 0; i < count.length; i++) {
-            for (int j = 0; j < count[i]; j++) {
-                // A new tail for each SimpleEntry key is made so the original tails are lost :(
-                // Stability of list remains, artificially, since it is supposed to for
-                // algorithms.CountingSort, hence I cheated here a bit
-                sorted.add(new SimpleEntry<>(giveInt(i + min, sample), j));
-            }
+        for (int i = 1; i < count.length; i++) {
+            count[i] += count[i - 1];
         }
 
-        return sorted;
+        SimpleEntry<T, Integer>[] buffer = new SimpleEntry[n];
+
+        for (int i = n - 1; i >= 0; i--) {
+            SimpleEntry<T, Integer> entry = list.get(i);
+            int pos = --count[getInt(entry.getKey()) - min];
+            buffer[pos] = entry;
+        }
+
+        for (int i = 0; i < n; i++) {
+            list.set(i, buffer[i]);
+        }
+
+        return list;
     }
 
-    private int getInt (T t) {
+    protected int getInt (T t) {
         if (t instanceof Number n) {
             // BigInteger and BigDecimal have intValueExact() which throws on overflow
             if (n instanceof BigInteger bi)  return bi.intValueExact();
@@ -88,7 +91,7 @@ public class CountingSort<T extends Comparable<T>> extends Sort<T> {
         else { throw new UnsupportedOperationException("Cannot convert " + t.getClass() + " to int"); }
     }
 
-    private T giveInt(int i, T sample) {
+    protected T giveInt(int i, T sample) {
         if (sample instanceof Integer)    return (T)(Integer) i;
         if (sample instanceof Long)       return (T)(Long)(long) i;
         if (sample instanceof Double)     return (T)(Double)(double) i;

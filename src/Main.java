@@ -95,14 +95,14 @@ public final class Main {
         List<SimpleEntry<Integer, Integer>> test = new ArrayList<>();
 
         while (count < limit - 1) {
-            if (limit - test.size() >= 2 && rng.nextInt(4) == 0) {
+            if (limit - test.size() >= 2 && rng.nextInt(Math.max(limit / 1000, 100)) == 0) {
                 // Force adjacent duplicates
-                int value = rng.nextInt(1000);
+                int value = rng.nextInt(limit * 10);
                 test.add(new SimpleEntry<>(value, count));
                 test.add(new SimpleEntry<>(value, count + 1));
                 count += 2;
             } else {
-                test.add(new SimpleEntry<>(rng.nextInt(1000), count));
+                test.add(new SimpleEntry<>(rng.nextInt(limit * 10), count));
                 count++;
             }
         }
