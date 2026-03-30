@@ -50,7 +50,12 @@ public class HeapSortTree<T extends  Comparable<T>> extends Sort<T> {
             }
         }
 
-        return sortedList;
+        // REVERT back to this return statement for testing,
+        // Current return statement is for animation
+        //return sortedList;
+
+        for (int i = 0; i < sortedList.size(); i++) { list.set(i, sortedList.get(i)); }
+        return list;
     }
 
     private HeapNode buildHeap(List<SimpleEntry<T, Integer>> list) {

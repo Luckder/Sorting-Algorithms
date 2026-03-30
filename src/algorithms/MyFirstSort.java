@@ -43,6 +43,6 @@ public class MyFirstSort<T extends Comparable<T>> extends Sort<T> {
 
     @Override
     public String toString() {
-        return "My First Sorting Algorithm Made";
+        return "My First Sorting Algorithm";
     }
 }

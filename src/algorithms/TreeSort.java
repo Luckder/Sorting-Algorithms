@@ -28,7 +28,12 @@ public class TreeSort<T extends Comparable<T>> extends Sort<T> {
             sorted.addAll(group); // original insertion order preserved within group → stable
         }
 
-        return sorted;
+        // REVERT back to this return statement for testing,
+        // Current return statement is for animation
+        //return sorted;
+
+        for (int i = 0; i < sorted.size(); i++) { list.set(i, sorted.get(i)); }
+        return list;
     }
 
     @Override

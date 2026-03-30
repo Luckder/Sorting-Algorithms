@@ -6,7 +6,7 @@ import java.util.List;
 // Author: David Chan (Luckder)
 
 public class MergeSortRecursiveModified<T extends Comparable<T>> extends MergeSortRecursive<T> {
-    // A modified version of MergeSort that uses algorithms.InsertionSort for small lists (size < 32)
+    // A modified version of MergeSort that uses InsertionSort for small lists (size < 32)
 
     private final InsertionSort<T> insertionSort = new InsertionSort<>();
 
@@ -20,7 +20,18 @@ public class MergeSortRecursiveModified<T extends Comparable<T>> extends MergeSo
         List<SimpleEntry<T, Integer>> left = sort(list.subList(0, mid));
         List<SimpleEntry<T, Integer>> right = sort(list.subList(mid, n));
 
-        return merge(left, right);
+        // REVERT back to this return statement for testing,
+        // Current return statement + a few more code is for animation
+        //return merge(left, right);
+
+        List<SimpleEntry<T, Integer>> merged = merge(left, right);
+
+        // Write merged result back into original list — fires TrackingList frames
+        for (int i = 0; i < merged.size(); i++) {
+            list.set(i, merged.get(i));
+        }
+
+        return merged;
     }
 
     @Override

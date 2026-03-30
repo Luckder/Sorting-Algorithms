@@ -73,24 +73,41 @@ public class SortVisualiser extends Application {
             Sort<Integer> sorter = algorithmPicker.getValue();
             if (sorter == null) return;
 
-            int size = (int) sizeSlider.getValue();
-            List<SimpleEntry<Integer, Integer>> data = Main.makeIntegerList(size);
+//            int size = (int) sizeSlider.getValue();
+//            List<SimpleEntry<Integer, Integer>> data = Main.makeIntegerList(size);
+//
+//            // Record all frames by attaching a listener BEFORE sorting
+//            frames.clear();
+//            frameIndex = 0;
+//
+//            // Capture initial state
+//            frames.add(snapshot(data, -1, -1));
+//
+//            // sorter.setListener((list, i, j) -> frames.add(snapshot(list, i, j)));
+//
+//            // Sort on a background thread so we don't block JavaFX
+//            new Thread(() -> {
+//                sorter.sort(data);
+//                // Add a final clean frame with no highlights
+//                frames.add(snapshot(data, -1, -1));
+//                // Start playback on the JavaFX thread
+//                javafx.application.Platform.runLater(() -> playFrames(gc));
+//            }).start();
 
-            // Record all frames by attaching a listener BEFORE sorting
+            int size = (int) sizeSlider.getValue();
+            List<SimpleEntry<Integer, Integer>> rawData = Main.makeIntegerList(size);
+
             frames.clear();
             frameIndex = 0;
+            frames.add(snapshot(rawData, -1, -1));
 
-            // Capture initial state
-            frames.add(snapshot(data, -1, -1));
+// Wrap the list — every set() fires a snapshot regardless of which algorithm
+            TrackingList<SimpleEntry<Integer, Integer>> tracked = new TrackingList<>(rawData,
+                    (index, value) -> frames.add(snapshot(rawData, index, -1)));
 
-            sorter.setListener((list, i, j) -> frames.add(snapshot(list, i, j)));
-
-            // Sort on a background thread so we don't block JavaFX
             new Thread(() -> {
-                sorter.sort(data);
-                // Add a final clean frame with no highlights
-                frames.add(snapshot(data, -1, -1));
-                // Start playback on the JavaFX thread
+                sorter.sort(tracked);
+                frames.add(snapshot(rawData, -1, -1));
                 javafx.application.Platform.runLater(() -> playFrames(gc));
             }).start();
         });

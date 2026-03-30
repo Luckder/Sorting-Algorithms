@@ -5,7 +5,7 @@ import java.util.List;
 
 // Author: David Chan (Luckder)
 
-public class ShellSort<T extends Comparable<T>> extends Sort<T> {
+public class ShellSort<T extends Comparable<T>> extends InsertionSort<T> {
     // A generalisation of InsertionSort that sorts elements far apart first,
     // progressively shrinking the gap until gap = 1 (plain InsertionSort).
     // The shrinking gap means elements travel long distances early, so the final
@@ -16,6 +16,7 @@ public class ShellSort<T extends Comparable<T>> extends Sort<T> {
     // O(1) space, not stable (gap > 1 swaps can cross equal elements).
 
     // Ciura's empirically optimal gap sequence — proven best known in benchmarks
+    // Better than ShellSort's original n/2 halvings and Knuth's (3^k - 1) / 2
     private static final int[] GAPS = { 701, 301, 132, 57, 23, 10, 4, 1 };
 
     @Override
@@ -26,27 +27,26 @@ public class ShellSort<T extends Comparable<T>> extends Sort<T> {
         int n = list.size();
 
         for (int gap : GAPS) {
-            if (gap >= n) { continue; } // Gap larger than list — skip, not applicable
-
-            // Insertion sort with this gap width
-            // Every element at distance 'gap' from each other forms a sub-sequence
-            // that is independently insertion-sorted
-            for (int i = gap; i < n; i++) {
-                SimpleEntry<T, Integer> temp = list.get(i);
-                int j = i;
-
-                // Shift elements of the gap-sub-sequence that are greater than temp
-                // one position ahead, making room for temp's correct position
-                while (j >= gap && list.get(j - gap).getKey().compareTo(temp.getKey()) > 0) {
-                    list.set(j, list.get(j - gap));
-                    j -= gap;
-                }
-
-                list.set(j, temp);
-            }
+            if (gap >= n) { continue; }
+            insertionSortGapped(list, 0, n, gap); // reuses InsertionSort's logic
         }
 
         return list;
+    }
+
+    protected void insertionSortGapped(List<SimpleEntry<T, Integer>> list, int lo, int hi, int gap) {
+        for (int i = lo + gap; i < hi; i++) {
+            SimpleEntry<T, Integer> curr = list.get(i);
+
+            int j = i - gap;
+
+            while (j >= lo && list.get(j).getKey().compareTo(curr.getKey()) > 0) {
+                list.set(j + gap, list.get(j));
+                j -= gap;
+            }
+
+            list.set(j + gap, curr);
+        }
     }
 
     @Override

@@ -21,7 +21,18 @@ public class MergeSort3Way<T extends Comparable<T>> extends MergeSortRecursive<T
         List<SimpleEntry<T, Integer>> middle = sort(list.subList(third, 2 * third));
         List<SimpleEntry<T, Integer>> right = sort(list.subList(2 * third, n));
 
-        return merge(left, middle, right);
+        // REVERT back to this return statement for testing,
+        // Current return statement + a few more code is for animation
+        //return merge(left, middle, right);
+
+        List<SimpleEntry<T, Integer>> merged = merge(left, middle, right);
+
+        // Write merged result back into original list — fires TrackingList frames
+        for (int i = 0; i < merged.size(); i++) {
+            list.set(i, merged.get(i));
+        }
+
+        return merged;
     }
 
     protected List<SimpleEntry<T, Integer>> merge(List<SimpleEntry<T, Integer>> left, List<SimpleEntry<T, Integer>> middle, List<SimpleEntry<T, Integer>> right) {
