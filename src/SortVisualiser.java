@@ -34,8 +34,6 @@ public class SortVisualiser extends Application {
         // Controls
         ComboBox<Sort<Integer>> algorithmPicker = new ComboBox<>();
         Main.load().stream()
-                .filter(a -> !(a.toString().equals("CosmicSort")))
-                .filter(a -> !(a.toString().equals("BogoSort")))
                 .forEach(a -> {
                     @SuppressWarnings("unchecked")
                     Sort<Integer> s = (Sort<Integer>) a;
@@ -105,11 +103,11 @@ public class SortVisualiser extends Application {
             TrackingList<SimpleEntry<Integer, Integer>> tracked = new TrackingList<>(rawData,
                     (index, value) -> frames.add(snapshot(rawData, index, -1)));
 
-            new Thread(() -> {
+            CompletableFuture.runAsync(() -> {
                 sorter.sort(tracked);
-                frames.add(snapshot(rawData, -1, -1));
-                javafx.application.Platform.runLater(() -> playFrames(gc));
-            }).start();
+            }).thenRun(() ->
+                    javafx.application.Platform.runLater(() -> playFrames(gc))
+            );
         });
 
         HBox controls = new HBox(12,

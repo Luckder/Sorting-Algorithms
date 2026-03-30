@@ -1,9 +1,6 @@
 import algorithms.*;
 import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import io.github.classgraph.ClassGraph;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ScanResult;
 
 // Author: David Chan (Luckder)
 
@@ -11,26 +8,41 @@ public final class Main {
     private static final List<Sort<? extends Comparable<?>>> algorithms = load();
 
     static List<Sort<? extends Comparable<?>>> load() {
-        List<Sort<? extends Comparable<?>>> list = new ArrayList<>();
-
-        try (ScanResult scan = new ClassGraph()
-                .enableClassInfo()
-                .acceptPackages("algorithms")
-                .scan()) {
-
-            for (ClassInfo info : scan.getSubclasses(Sort.class)) {
-                if (!info.isAbstract()) {
-                    Sort<? extends Comparable<?>> instance = (Sort<? extends Comparable<?>>) info.loadClass()
-                            .getDeclaredConstructor()
-                            .newInstance();
-                    list.add(instance);
-                }
-            }
-
-            return list;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to load sorting algorithms", e);
-        }
+        return List.of(
+                new BogoSort<>(),
+                new BubbleSort<>(),
+                new BucketSort<>(),
+                new CocktailSort<>(),
+                new CombSort<>(),
+                new CosmicSort<>(),
+                new CountingSort<>(),
+                new CycleSort<>(),
+                new GnomeSort<>(),
+                new HeapSort<>(),
+                new HeapSortTree<>(),
+                new InsertionSort<>(),
+                new IntroSort<>(),
+                new MergeSort3Way<>(),
+                new MergeSortIterative<>(),
+                new MergeSortRecursive<>(),
+                new MergeSortRecursiveModified<>(),
+                new MyFirstSort(),
+                new PigeonholeSort<>(),
+                new QuickSort3Median<>(),
+                new QuickSort3Way<>(),
+                new QuickSortHoare<>(),
+                new QuickSortHoareParanoid<>(),
+                new QuickSortLomuto<>(),
+                new QuickSortLomutoParanoid<>(),
+                new QuickSortPD<>(),
+                new RadixSort<>(),
+                new SelectionSort<>(),
+                new ShellSort<>(),
+                new SpaghettiSort<>(),
+                new TimSort<>(),
+                new TimSortFake<>(),
+                new TreeSort<>()
+        );
     }
 
     static String getTime(long nanos) {

@@ -1,0 +1,7 @@
+.idea/
+build/
+dist/
+Files/
+out/
+target/
+*.log
