@@ -24,10 +24,13 @@ public class SortVisualiser {
     private volatile long frameDelayNanos = 44_100_000L;
     private boolean isBogoSort = false;
 
-    // Timer fields. sortStartNanos == 0 means "no sort has run yet, don't draw timer".
-    // sortEndNanos == -1 means "sort is still in progress, show live elapsed time".
     private volatile long sortStartNanos = 0;
     private volatile long sortEndNanos   = -1;
+
+    private volatile long   readCount      = 0;
+    private volatile long   writeCount     = 0;
+    private volatile String currentAlgName = "";
+    private volatile int    currentN       = 0;
 
     public void createAndShowGUI() {
 
@@ -88,9 +91,14 @@ public class SortVisualiser {
             String algName = sorter.toString();
             isBogoSort = algName.equals("BogoSort");
 
+            currentAlgName = algName;
+            currentN       = size;
+            readCount      = 0;
+            writeCount     = 0;
+
             if (algName.equals("CosmicSort") || algName.equals("MyFirstSort")) {
                 sortedSnapshot = null;
-                sortStartNanos = 0;   // No timer for these
+                sortStartNanos = 0;
                 currentFrame   = snapshot(rawData, -1, "NONE", 0);
                 canvas.repaint();
                 return;
@@ -100,7 +108,6 @@ public class SortVisualiser {
 
             Thread sortThread = new Thread(() -> {
                 try {
-                    // Build stable sorted reference before touching the list.
                     List<SimpleEntry<Integer, Integer>> refList = new ArrayList<>(rawData);
                     refList.sort(Comparator.comparingInt(SimpleEntry::getKey));
                     int[] refKeys    = new int[refList.size()];
@@ -111,17 +118,16 @@ public class SortVisualiser {
                     }
                     sortedSnapshot = new SortedRef(refKeys, refIndices);
 
-                    // Timer starts now — after setup, just before the sort begins.
                     sortEndNanos   = -1;
                     sortStartNanos = System.nanoTime();
 
                     if (isBogoSort) {
                         while (sortGeneration == gen) {
                             Collections.shuffle(rawData);
+                            writeCount++;
                             currentFrame = snapshot(rawData, -1, "NONE", 0);
                             LockSupport.parkNanos(frameDelayNanos);
                             if (isSorted(rawData)) {
-                                // Stop the timer before the sweep — the sort itself is done.
                                 sortEndNanos = System.nanoTime();
                                 for (int i = 0; i <= rawData.size(); i++) {
                                     if (sortGeneration != gen) return;
@@ -138,18 +144,19 @@ public class SortVisualiser {
                     TrackingList<SimpleEntry<Integer, Integer>> tracked = new TrackingList<>(rawData,
                             (index, value) -> {
                                 if (sortGeneration != gen) throw new RuntimeException("Cancelled");
+                                writeCount++;
                                 currentFrame = snapshot(rawData, index, "WRITE", 0);
                                 LockSupport.parkNanos(frameDelayNanos);
                             },
                             (index) -> {
                                 if (sortGeneration != gen) throw new RuntimeException("Cancelled");
+                                readCount++;
                                 currentFrame = snapshot(rawData, index, "READ", 0);
                                 LockSupport.parkNanos(frameDelayNanos);
                             });
 
                     sorter.sort(tracked);
 
-                    // Stop the timer the moment sorting finishes, before the cosmetic sweep.
                     sortEndNanos = System.nanoTime();
 
                     for (int i = 0; i <= rawData.size(); i++) {
@@ -202,7 +209,7 @@ public class SortVisualiser {
         double barW = (double) WIDTH / n;
         int maxVal  = frame.maxValue();
 
-        SortedRef sorted = sortedSnapshot; // capture volatile reference once
+        SortedRef sorted = sortedSnapshot;
 
         for (int i = 0; i < n; i++) {
             double barH = (double) frame.values()[i] / maxVal * BAR_AREA_H;
@@ -214,37 +221,30 @@ public class SortVisualiser {
 
             Color fillColor;
 
-            if (i < frame.greenCount()) {
-                // Inside the sweep zone: determine green vs purple per element.
-                // Green  = key matches AND original index matches (stable position).
-                // Purple = key matches BUT original index differs (sorted but unstable).
-                // A key mismatch here would mean the sort produced a wrong result —
-                // keep it blue as a silent error indicator rather than asserting.
-                boolean keyMatch = sorted != null && frame.values()[i] == sorted.keys()[i];
-                boolean idxMatch = sorted != null && frame.originalIndices()[i] == sorted.indices()[i];
+            // In both zones the logic is identical:
+            //   key match + index match → green  (correct position, stable)
+            //   key match only          → purple (correct position, unstable)
+            //   active read/write       → yellow / red   (only meaningful outside sweep)
+            //   default                 → blue
+            //
+            // The sweep zone (i < greenCount) never shows red/yellow because the
+            // algorithm has already finished touching those elements.
+            if (sorted != null) {
+                boolean keyMatch = frame.values()[i]          == sorted.keys()[i];
+                boolean idxMatch = frame.originalIndices()[i] == sorted.indices()[i];
 
-                if (keyMatch && idxMatch) {
-                    fillColor = new Color(40, 200, 80);         // Green  — correct and stable
-                } else if (keyMatch) {
-                    fillColor = new Color(160, 60, 220);        // Purple — correct key, wrong stability
-                } else {
-                    fillColor = new Color(80, 180, 255);        // Blue   — should not happen post-sort
-                }
+                if      (keyMatch && idxMatch) fillColor = new Color( 40, 200,  80);  // Green  — correct and stable
+                else if (keyMatch)             fillColor = new Color(160,  60, 220);  // Purple — correct key, unstable order
+                else if (i < frame.greenCount())               fillColor = new Color( 80, 180, 255);  // Blue   — wrong result (shouldn't occur post-sort)
+                else if (i == frame.targetIndex() && "WRITE".equals(frame.type())) fillColor = new Color(255,  80,  80);  // Red    — active write
+                else if (i == frame.targetIndex() && "READ" .equals(frame.type())) fillColor = new Color(255, 255,  80);  // Yellow — active read
+                else                           fillColor = new Color( 80, 180, 255);  // Blue   — unsorted, untouched
             } else {
-                // Outside the sweep zone: live position check during sorting.
-                boolean liveGreen = sorted != null
-                        && frame.values()[i]          == sorted.keys()[i]
-                        && frame.originalIndices()[i] == sorted.indices()[i];
-
-                if (liveGreen) {
-                    fillColor = new Color(40, 200, 80);
-                } else if (i == frame.targetIndex() && "WRITE".equals(frame.type())) {
-                    fillColor = new Color(255, 80, 80);
-                } else if (i == frame.targetIndex() && "READ".equals(frame.type())) {
-                    fillColor = new Color(255, 255, 80);
-                } else {
-                    fillColor = new Color(80, 180, 255);
-                }
+                // No reference available (CosmicSort / MyFirstSort edge case).
+                if      (i < frame.greenCount())                                        fillColor = new Color( 40, 200,  80);
+                else if (i == frame.targetIndex() && "WRITE".equals(frame.type()))      fillColor = new Color(255,  80,  80);
+                else if (i == frame.targetIndex() && "READ" .equals(frame.type()))      fillColor = new Color(255, 255,  80);
+                else                                                                    fillColor = new Color( 80, 180, 255);
             }
 
             g.setColor(fillColor);
@@ -256,29 +256,62 @@ public class SortVisualiser {
             }
         }
 
-        // Timer overlay — drawn last so it sits on top of the bars.
-        drawTimer(g);
+        drawOverlay(g);
     }
 
-    private void drawTimer(Graphics2D g) {
-        long start = sortStartNanos;
-        if (start == 0) return; // No sort has run yet.
+    private void drawOverlay(Graphics2D g) {
+        if (currentAlgName.isEmpty()) return;
 
-        long end     = sortEndNanos;
-        long elapsed = (end < 0) ? System.nanoTime() - start : end - start;
-        String label = "Time: " + Main.getTime(elapsed);
+        String timeStr;
+        if (sortStartNanos == 0) {
+            timeStr = "—";
+        } else {
+            long end     = sortEndNanos;
+            long elapsed = (end < 0) ? System.nanoTime() - sortStartNanos : end - sortStartNanos;
+            timeStr = formatElapsed(elapsed);
+        }
 
-        g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
+        String[] labels = { "Algorithm", "Size", "Reads", "Writes", "Time" };
+        String[] values = {
+                currentAlgName,
+                String.format("%,d", currentN),
+                String.format("%,d", readCount),
+                String.format("%,d", writeCount),
+                timeStr
+        };
+
+        g.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 13));
         FontMetrics fm = g.getFontMetrics();
-        int tw = fm.stringWidth(label);
-        int th = fm.getHeight();
 
-        // Semi-transparent dark pill behind the text for readability over any bar colour.
-        g.setColor(new Color(0, 0, 0, 160));
-        g.fillRoundRect(8, 8, tw + 14, th + 8, 8, 8);
+        int labelColW = 0, valueColW = 0;
+        for (String l : labels) labelColW = Math.max(labelColW, fm.stringWidth(l));
+        for (String v : values) valueColW = Math.max(valueColW, fm.stringWidth(v));
 
-        g.setColor(Color.WHITE);
-        g.drawString(label, 15, 8 + fm.getAscent() + 4);
+        int colGap = 12;
+        int padX   = 10, padY = 8;
+        int lineH  = fm.getHeight();
+        int boxW   = padX * 2 + labelColW + colGap + valueColW;
+        int boxH   = padY * 2 + lineH * labels.length;
+
+        g.setColor(new Color(0, 0, 0, 170));
+        g.fillRoundRect(8, 8, boxW, boxH, 10, 10);
+
+        int baseX = 8 + padX;
+        int baseY = 8 + padY + fm.getAscent();
+        for (int i = 0; i < labels.length; i++) {
+            int rowY = baseY + i * lineH;
+            g.setColor(new Color(160, 160, 160));
+            g.drawString(labels[i], baseX, rowY);
+            g.setColor(Color.WHITE);
+            g.drawString(values[i], baseX + labelColW + colGap, rowY);
+        }
+    }
+
+    private static String formatElapsed(long nanos) {
+        if (nanos > 3_600_000_000_000L) return String.format("%.2f h",   nanos / 3_600_000_000_000.0);
+        if (nanos > 60_000_000_000L)    return String.format("%.2f min", nanos / 60_000_000_000.0);
+        if (nanos > 1_000_000_000L)     return String.format("%.2f s",   nanos / 1_000_000_000.0);
+        return                                 String.format("%.2f ms",  nanos / 1_000_000.0);
     }
 
     private void drawEmpty(Graphics2D g) {

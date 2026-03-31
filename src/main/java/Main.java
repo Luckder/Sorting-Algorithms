@@ -122,6 +122,27 @@ public final class Main {
         return test;
     }
 
+    public static  List<SimpleEntry<Character, Integer>> makeCharacterList(int limit) {
+        int count = 0;
+        Random rng = new Random();
+        List<SimpleEntry<Character, Integer>> test = new ArrayList<>();
+
+        while (count < limit) {
+            if (limit - test.size() >= 2 && rng.nextInt(Math.max(limit / 1000, 100)) == 0) {
+                // Force adjacent duplicates
+                int value = rng.nextInt(128);
+                test.add(new SimpleEntry<>((char) value, count));
+                test.add(new SimpleEntry<>((char) value, count + 1));
+                count += 2;
+            } else {
+                test.add(new SimpleEntry<>((char) rng.nextInt(128), count));
+                count++;
+            }
+        }
+
+        return test;
+    }
+
     public static void main(String[] args) {
         run(makeIntegerList(100001));
     }

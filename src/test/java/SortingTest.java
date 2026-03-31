@@ -21,13 +21,28 @@ public final class SortingTest {
 
     private static final List<Sort<? extends Comparable<?>>> algorithms = Main.load();
 
-    static Stream<Sort<Integer>> provideAlgorithms() {
+    static Stream<Sort<?>> provideAlgorithms() {
         return algorithms.stream()
+                .filter(alg -> !(alg.toString().equals("CosmicSort")))
+                .filter(alg -> !(alg.toString().equals("BogoSort")));
+    }
+
+    static Stream<Sort<Integer>> provideInteger() {
+        return provideAlgorithms()
                 .filter(alg -> !(alg.toString().equals("CosmicSort")))
                 .filter(alg -> !(alg.toString().equals("BogoSort")))
                 .map(alg -> {
-                    @SuppressWarnings("unchecked")
-                    Sort<Integer> s = (Sort<Integer>) alg;
+                   Sort<Integer> s = (Sort<Integer>) alg;
+                   return s;
+                });
+    }
+
+    static Stream<Sort<Character>> provideCharacter() {
+        return provideAlgorithms()
+                .filter(alg -> !(alg.toString().equals("CosmicSort")))
+                .filter(alg -> !(alg.toString().equals("BogoSort")))
+                .map(alg -> {
+                    Sort<Character> s = (Sort<Character>) alg;
                     return s;
                 });
     }
@@ -58,7 +73,7 @@ public final class SortingTest {
     }
 
     @ParameterizedTest
-    @MethodSource("provideAlgorithms")
+    @MethodSource("provideInteger")
     void sortTestAll(Sort<Integer> sorter) {
         List<SimpleEntry<Integer, Integer>> fresh = sorter.sort(Main.makeIntegerList(10000));
         assertTrue(sorter.isSorted(fresh), sorter + " did not sort correctly!");
@@ -165,6 +180,13 @@ public final class SortingTest {
                 totalRaceTime.toMillis() / 1000.0);
 
         assertTrue(raceErrors.isEmpty(), "Algorithms failed during the race: " + raceErrors);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideCharacter")
+    void sortTestAllChar(Sort<Character> sorter) {
+        List<SimpleEntry<Character, Integer>> fresh = sorter.sort(Main.makeCharacterList(10000));
+        assertTrue(sorter.isSorted(fresh), sorter + " did not sort correctly!");
     }
 
 }
