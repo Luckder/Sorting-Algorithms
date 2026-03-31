@@ -106,7 +106,7 @@ public final class Main {
         Random rng = new Random();
         List<SimpleEntry<Integer, Integer>> test = new ArrayList<>();
 
-        while (count < limit - 1) {
+        while (count < limit) {
             if (limit - test.size() >= 2 && rng.nextInt(Math.max(limit / 1000, 100)) == 0) {
                 // Force adjacent duplicates
                 int value = rng.nextInt(limit * 10);
